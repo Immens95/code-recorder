@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Recorder Demo</title>
+  <style>
+    body { background: #111; display:flex; justify-content:center; align-items:center; height:100vh; }
+    #box { width:150px; height:150px; background:#1f9aff; animation: spin 3s infinite linear; }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Demo che vuoi registrare -->
+  <div id="box"></div>
+
+  <script>
+    // Seleziona elemento da registrare
+    const element = document.getElementById("box");
+
+    // Usa canvas per catturare
+    const stream = element.captureStream(30); // 30 fps
+    const recorder = new MediaRecorder(stream, {
+      mimeType: "video/webm; codecs=vp9"
+    });
+
+    let chunks = [];
+    recorder.ondataavailable = e => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
+
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: "video/webm" });
+      const url = URL.createObjectURL(blob);
+
+      // Scarica il video
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "output.webm";
+      a.click();
+    };
+
+    // Avvia registrazione
+    recorder.start();
+
+    // Ferma dopo 10 secondi
+    setTimeout(() => recorder.stop(), 10000);
+  </script>
+</body>
+</html>
